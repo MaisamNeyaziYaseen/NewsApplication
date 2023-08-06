@@ -16,10 +16,10 @@ class SearchEndpointService {
     if (category.toLowerCase() == "home") {
       //get all categories
       uri = Uri.parse(
-          "$_url$_endpoint?api-key=$_apiKey&show-fields=thumbnail,body-text&page=$page&page-size=$pageSize");
+          "$_url$_endpoint?api-key=$_apiKey&show-fields=thumbnail,body-text&page=$page&page-size=$pageSize&from-date=${DateTime.parse("2014-02-01").toIso8601String()}");
     } else {
       uri = Uri.parse(
-          "$_url$_endpoint?api-key=$_apiKey&show-fields=thumbnail,body-text&page=$page&page-size=$pageSize&section=${category.toLowerCase()}");
+          "$_url$_endpoint?api-key=$_apiKey&show-fields=thumbnail,body-text&page=$page&page-size=$pageSize&section=${category.toLowerCase()}&from-date=${DateTime.parse("2014-02-01").toIso8601String()}");
     }
 
     Map<String, dynamic> data = {};

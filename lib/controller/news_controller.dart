@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:news_application/model/news.dart';
 import 'package:news_application/model/news_category.dart';
-import 'package:news_application/services/api/news_api_service/search_endpoint.dart';
-import 'package:news_application/services/api/news_api_service/sections_endpoint.dart';
+import 'package:news_application/services/api/news_api/search_endpoint.dart';
+import 'package:news_application/services/api/news_api/sections_endpoint.dart';
 
 final ChangeNotifierProvider<NewsController> newsProvider =
     ChangeNotifierProvider<NewsController>((ref) => NewsController());
@@ -16,12 +16,15 @@ class NewsController extends ChangeNotifier {
       SectionsEndPointService();
   int _page = 1;
   final int _pageSize = 10;
+  String _fromDate = DateTime.now().toString();
+  String _toDate = DateTime.now().toString();
+  bool _isCategoriesLoading = true;
   List<News> _newsList = [];
   List<NewsCategory> _categoriesList = [];
   PagingController<int, News> _pagingController =
       PagingController(firstPageKey: 1);
 
-  Future<void> getCategories() async {
+  void getCategories(Function() onComplete) async {
     List<dynamic> results = await _sectionsEndPointService.getCategories(
         (status) => null, (e) => null);
     List<NewsCategory> categories = [
@@ -33,8 +36,9 @@ class NewsController extends ChangeNotifier {
     }
 
     _categoriesList.addAll(categories);
-
     notifyListeners();
+
+    onComplete();
   }
 
   void getNewsByCategoryPaginated(
@@ -43,6 +47,7 @@ class NewsController extends ChangeNotifier {
       Function(Exception e) onException,
       Function(PagingController<int, News> pc) onComplete) async {
     _page = 1;
+
     PagingController<int, News> pagingController =
         PagingController(firstPageKey: 1);
     pagingController.addPageRequestListener((pageKey) async {
@@ -72,9 +77,11 @@ class NewsController extends ChangeNotifier {
 
   int get getPage => _page;
   int get getPageSize => _pageSize;
+  bool get getisCategoriesLoading => _isCategoriesLoading;
   List<News> get getNewsList => _newsList;
   List<NewsCategory> get getCategoriesList => _categoriesList;
   PagingController<int, News> get getPagingController => _pagingController;
 
+  setIsCategoriesLoading(bool v) => _isCategoriesLoading = v;
   setPaginController(PagingController<int, News> v) => _pagingController = v;
 }
