@@ -1,39 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:news_application/controller/news_controller.dart';
-import 'package:news_application/model/news.dart';
+import 'package:news_application/view/components/drawer.dart';
+import 'package:news_application/view/components/tab_body.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends ConsumerState
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
   @override
   void initState() {
     super.initState();
 
-    ref.read(newsProvider).getAllNewsPaginated(
-        //on status code error
-        (status) => ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text("error: $status"))),
-        //on exception
-        (e) => ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text("$e"))));
+    ref.read(newsProvider).getCategories();
+    _tabController = TabController(
+        length: ref.read(newsProvider).getCategoriesList.length, vsync: this);
   }
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 3,
+    return SafeArea(
       child: Scaffold(
           appBar: AppBar(
             elevation: 0,
             backgroundColor: Colors.white,
-            leading: const Icon(
-              Icons.menu,
-              color: Color(0xff2C79A5),
+            leading: Builder(
+              builder: (context) => IconButton(
+                icon: Icon(Icons.menu),
+                color: Color(0xff2C79A5),
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+              ),
             ),
             title: const Text(
               "NewsFeed",
@@ -49,44 +51,43 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ],
             bottom: TabBar(
+                controller: _tabController,
                 labelColor: Color(0xff2C79A5),
                 indicatorColor: Color(0xff2C79A5),
                 unselectedLabelColor: Color(0xff2C79A5).withOpacity(0.5),
+                isScrollable: true,
                 tabs: [
-                  Tab(
-                    child: Text("Teab1"),
-                  ),
-                  Tab(
-                    child: Text(
-                      "Tab2",
+                  for (var category
+                      in ref.watch(newsProvider).getCategoriesList)
+                    Tab(
+                      child: Text(category.webTitle.toUpperCase()),
                     ),
-                  ),
-                  Tab(
-                    child: Text(
-                      "Teb3",
-                    ),
-                  )
                 ]),
           ),
-          body: TabBarView(
-            children: [
-              Center(
-                child: PagedListView<int, News>(
-                  pagingController: ref.watch(newsProvider).getPaginController,
-                  builderDelegate: PagedChildBuilderDelegate(
-                      itemBuilder: (context, newsItem, index) => Container(
-                            width: double.infinity,
-                            height: 50,
-                            child: Text(newsItem.title ?? ""),
+          drawer: Drawer(
+            child: Column(
+              children: [
+                MyDrawer(),
+                Expanded(
+                  child: ListView.builder(
+                      itemCount:
+                          ref.watch(newsProvider).getCategoriesList.length,
+                      itemBuilder: (context, index) => ListTile(
+                            leading: Icon(Icons.abc),
+                            title: Text(ref
+                                .watch(newsProvider)
+                                .getCategoriesList[index]
+                                .webTitle),
                           )),
-                ),
-              ),
-              Center(
-                child: Text("tab2"),
-              ),
-              Center(
-                child: Text("tab3"),
-              ),
+                )
+              ],
+            ),
+          ),
+          body: TabBarView(
+            controller: _tabController,
+            children: [
+              for (var category in ref.watch(newsProvider).getCategoriesList)
+                TabBody(category: category.id)
             ],
           )),
     );

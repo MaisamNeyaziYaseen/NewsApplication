@@ -3,7 +3,8 @@ class News {
   String? type;
   String? category;
   String? title;
-  String? content;
+  String content = "";
+  String? imageUrl;
   String? webUrl;
   DateTime? publicationDate;
 
@@ -20,7 +21,8 @@ class News {
     type = data['type'];
     category = data['sectionName'];
     title = data['webTitle'];
-    //content
+    content = data['fields']['bodyText'];
+    imageUrl = data['fields']['thumbnail'];
     webUrl = data['webUrl'];
     if (data['webPublicationDate'] != null) {
       DateTime.parse(data['webPublicationDate']);

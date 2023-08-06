@@ -1,54 +1,80 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:news_application/model/news.dart';
-import 'package:news_application/services/api/news_api.dart';
+import 'package:news_application/model/news_category.dart';
+import 'package:news_application/services/api/news_api_service/search_endpoint.dart';
+import 'package:news_application/services/api/news_api_service/sections_endpoint.dart';
 
 final ChangeNotifierProvider<NewsController> newsProvider =
     ChangeNotifierProvider<NewsController>((ref) => NewsController());
 
 class NewsController extends ChangeNotifier {
-  final NewsApiService _newsApiService = NewsApiService();
-  final PagingController<int, News> _pagingController =
-      PagingController(firstPageKey: 0);
+  final SearchEndpointService _searchEndpointService = SearchEndpointService();
+  final SectionsEndPointService _sectionsEndPointService =
+      SectionsEndPointService();
   int _page = 1;
   final int _pageSize = 10;
   List<News> _newsList = [];
+  List<NewsCategory> _categoriesList = [];
+  PagingController<int, News> _pagingController =
+      PagingController(firstPageKey: 1);
 
-  Future<List<News>> getAllNews(Function(int status) onStatusCodeError,
-      Function(Exception e) onException) async {
-    List<dynamic> results = await _newsApiService.getAllNews(_page, _pageSize,
-        (status) => onStatusCodeError(status), (e) => onException(e));
-    List<News> newsList = [];
+  Future<void> getCategories() async {
+    List<dynamic> results = await _sectionsEndPointService.getCategories(
+        (status) => null, (e) => null);
+    List<NewsCategory> categories = [
+      NewsCategory(id: "home", webTitle: "home")
+    ];
 
     for (var e in results) {
-      newsList.add(News.fromJson(e));
+      categories.add(NewsCategory.fromJson(e));
     }
 
-    // notifyListeners();
+    _categoriesList.addAll(categories);
 
-    return _newsList = newsList;
+    notifyListeners();
   }
 
-  List<News> getAllNewsPaginated(Function(int status) onStatusCodeError,
-      Function(Exception e) onException) {
-    List<News> newsList = [];
-    _pagingController.addPageRequestListener((pageKey) async {
-      newsList = await getAllNews(
-          (status) => onStatusCodeError(status), (e) => onException(e));
+  void getNewsByCategoryPaginated(
+      String category,
+      Function(int status) onStatusCodeError,
+      Function(Exception e) onException,
+      Function(PagingController<int, News> pc) onComplete) async {
+    _page = 1;
+    PagingController<int, News> pagingController =
+        PagingController(firstPageKey: 1);
+    pagingController.addPageRequestListener((pageKey) async {
+      List<dynamic> results = await _searchEndpointService.getNewsByCategory(
+          _page,
+          _pageSize,
+          category,
+          (status) => onStatusCodeError(status),
+          (e) => onException(e));
+
+      List<News> newsList = [];
+
+      for (var e in results) {
+        newsList.add(News.fromJson(e));
+      }
+      // _newsList = newsList;
       if (newsList.length < _pageSize) {
-        _pagingController.appendLastPage(newsList);
+        pagingController.appendLastPage(newsList);
       } else {
         _page++;
-        _pagingController.appendPage(newsList, _page);
+        pagingController.appendPage(newsList, _page);
       }
     });
 
-    return newsList;
+    onComplete(pagingController);
   }
 
-  PagingController<int, News> get getPaginController => _pagingController;
   int get getPage => _page;
   int get getPageSize => _pageSize;
   List<News> get getNewsList => _newsList;
+  List<NewsCategory> get getCategoriesList => _categoriesList;
+  PagingController<int, News> get getPagingController => _pagingController;
+
+  setPaginController(PagingController<int, News> v) => _pagingController = v;
 }
