@@ -17,9 +17,11 @@ class SearchEndpointService {
       Function(Exception e) onException) async {
     Uri uri;
     if (category.toLowerCase() == "home") {
+      String x =
+          "$_url$_endpoint?api-key=$_apiKey&show-fields=thumbnail,body-text&page=$page&page-size=$pageSize&from-date=${DateTime.parse(fromDate).toIso8601String()}&to-date=${DateTime.parse(toDate).toIso8601String().substring(0, 10)}&order-by=$orderBy";
+      print(x);
       //get all categories
-      uri = Uri.parse(
-          "$_url$_endpoint?api-key=$_apiKey&show-fields=thumbnail,body-text&page=$page&page-size=$pageSize&from-date=${DateTime.parse(fromDate).toIso8601String()}&to-date=${DateTime.parse(toDate).toIso8601String().substring(0, 10)}&order-by=$orderBy");
+      uri = Uri.parse(x);
     } else {
       uri = Uri.parse(
           "$_url$_endpoint?api-key=$_apiKey&show-fields=thumbnail,body-text&page=$page&page-size=$pageSize&section=${category.toLowerCase()}&from-date=${DateTime.parse(fromDate).toIso8601String().substring(0, 10)}&to-date=${DateTime.parse(toDate).toIso8601String()}&order-by=$orderBy");

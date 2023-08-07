@@ -1,9 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.news_application">
+    <uses-permission android:name="android.permission.INTERNET"/>
    <application
-        android:label="news_application"
+        android:label="The Guardian"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/theguardian">
         <activity
             android:name=".MainActivity"
             android:exported="true"

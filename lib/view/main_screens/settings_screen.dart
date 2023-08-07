@@ -93,6 +93,7 @@ class SettingsScreen extends ConsumerWidget {
                       lastDate: DateTime.now());
                   if (newDate != null) {
                     ref.watch(newsProvider).setFromDate(newDate.toString());
+                    ref.watch(newsProvider).getPagingController.refresh();
                   }
                 }),
             SettingsOptionsHolder(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:news_application/model/news.dart';
 import 'package:news_application/utils/data_helper.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class NewsHolder extends ConsumerWidget {
   News news;
@@ -13,10 +14,12 @@ class NewsHolder extends ConsumerWidget {
     return Align(
       child: InkWell(
         onTap: () async {
-          print(news.webUrl);
-
-          ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Could not launch ${news.webUrl}')));
+          try {
+            launchUrl(Uri.parse(news.webUrl ?? ""));
+          } on Exception catch (e) {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text("$e")));
+          }
         },
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
@@ -56,10 +59,9 @@ class NewsHolder extends ConsumerWidget {
                               height: 10,
                             ),
                             Text(
-                              news.content.length > 151
-                                  ? "${news.content.substring(0, 150)}..."
-                                  : news.content,
-                              textAlign: TextAlign.justify,
+                              news.content,
+                              maxLines: 8,
+                              // textAlign: TextAlign.justify,
                               style:
                                   TextStyle(color: Colors.grey, fontSize: 16),
                             )
