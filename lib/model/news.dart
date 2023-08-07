@@ -25,7 +25,7 @@ class News {
     imageUrl = data['fields']['thumbnail'];
     webUrl = data['webUrl'];
     if (data['webPublicationDate'] != null) {
-      DateTime.parse(data['webPublicationDate']);
+      publicationDate = DateTime.parse(data['webPublicationDate']);
     }
   }
 }

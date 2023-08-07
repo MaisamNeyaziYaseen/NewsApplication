@@ -10,16 +10,19 @@ class SearchEndpointService {
       int page,
       int pageSize,
       String category,
+      String fromDate,
+      String toDate,
+      String orderBy,
       Function(int status) onStatusCodeError,
       Function(Exception e) onException) async {
     Uri uri;
     if (category.toLowerCase() == "home") {
       //get all categories
       uri = Uri.parse(
-          "$_url$_endpoint?api-key=$_apiKey&show-fields=thumbnail,body-text&page=$page&page-size=$pageSize&from-date=${DateTime.parse("2014-02-01").toIso8601String()}");
+          "$_url$_endpoint?api-key=$_apiKey&show-fields=thumbnail,body-text&page=$page&page-size=$pageSize&from-date=${DateTime.parse(fromDate).toIso8601String()}&to-date=${DateTime.parse(toDate).toIso8601String().substring(0, 10)}&order-by=$orderBy");
     } else {
       uri = Uri.parse(
-          "$_url$_endpoint?api-key=$_apiKey&show-fields=thumbnail,body-text&page=$page&page-size=$pageSize&section=${category.toLowerCase()}&from-date=${DateTime.parse("2014-02-01").toIso8601String()}");
+          "$_url$_endpoint?api-key=$_apiKey&show-fields=thumbnail,body-text&page=$page&page-size=$pageSize&section=${category.toLowerCase()}&from-date=${DateTime.parse(fromDate).toIso8601String().substring(0, 10)}&to-date=${DateTime.parse(toDate).toIso8601String()}&order-by=$orderBy");
     }
 
     Map<String, dynamic> data = {};

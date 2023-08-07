@@ -24,8 +24,9 @@ class _TabBodyState extends ConsumerState<TabBody> {
   void initState() {
     super.initState();
 
+    ref.read(newsProvider).setCategory(category);
+
     ref.read(newsProvider).getNewsByCategoryPaginated(
-        category,
         (status) => ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text("error: $status"))),
         (e) => ScaffoldMessenger.of(context)
@@ -38,13 +39,19 @@ class _TabBodyState extends ConsumerState<TabBody> {
 
   @override
   Widget build(BuildContext context) {
-    return PagedListView<int, News>(
-        itemExtent: 330,
-        pagingController: ref.watch(newsProvider).getPagingController,
-        builderDelegate: PagedChildBuilderDelegate(
-            itemBuilder: (context, newsItem, index) => Container(
-                width: double.infinity,
-                height: 50,
-                child: NewsHolder(news: newsItem))));
+    return RefreshIndicator(
+      onRefresh: () async {
+        ref.read(newsProvider).setPage(1);
+        ref.read(newsProvider).getPagingController.refresh();
+      },
+      child: PagedListView<int, News>(
+          itemExtent: 330,
+          pagingController: ref.watch(newsProvider).getPagingController,
+          builderDelegate: PagedChildBuilderDelegate(
+              itemBuilder: (context, newsItem, index) => Container(
+                  width: double.infinity,
+                  height: 50,
+                  child: NewsHolder(news: newsItem)))),
+    );
   }
 }

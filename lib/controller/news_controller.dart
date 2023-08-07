@@ -15,9 +15,11 @@ class NewsController extends ChangeNotifier {
   final SectionsEndPointService _sectionsEndPointService =
       SectionsEndPointService();
   int _page = 1;
-  final int _pageSize = 10;
+  int _pageSize = 10;
+  String _category = "home";
   String _fromDate = DateTime.now().toString();
   String _toDate = DateTime.now().toString();
+  String _orderBy = "newest";
   bool _isCategoriesLoading = true;
   List<News> _newsList = [];
   List<NewsCategory> _categoriesList = [];
@@ -42,7 +44,6 @@ class NewsController extends ChangeNotifier {
   }
 
   void getNewsByCategoryPaginated(
-      String category,
       Function(int status) onStatusCodeError,
       Function(Exception e) onException,
       Function(PagingController<int, News> pc) onComplete) async {
@@ -54,7 +55,10 @@ class NewsController extends ChangeNotifier {
       List<dynamic> results = await _searchEndpointService.getNewsByCategory(
           _page,
           _pageSize,
-          category,
+          _category,
+          _fromDate,
+          _toDate,
+          _orderBy,
           (status) => onStatusCodeError(status),
           (e) => onException(e));
 
@@ -63,7 +67,8 @@ class NewsController extends ChangeNotifier {
       for (var e in results) {
         newsList.add(News.fromJson(e));
       }
-      // _newsList = newsList;
+      _newsList = newsList;
+      notifyListeners();
       if (newsList.length < _pageSize) {
         pagingController.appendLastPage(newsList);
       } else {
@@ -77,11 +82,50 @@ class NewsController extends ChangeNotifier {
 
   int get getPage => _page;
   int get getPageSize => _pageSize;
+  String get GetCategory => _category;
+  String get getFromDate => _fromDate;
+  String get getToDate => _toDate;
+  String get getorderBy => _orderBy;
   bool get getisCategoriesLoading => _isCategoriesLoading;
   List<News> get getNewsList => _newsList;
   List<NewsCategory> get getCategoriesList => _categoriesList;
   PagingController<int, News> get getPagingController => _pagingController;
 
-  setIsCategoriesLoading(bool v) => _isCategoriesLoading = v;
-  setPaginController(PagingController<int, News> v) => _pagingController = v;
+  setPage(int v) {
+    _page = v;
+    notifyListeners();
+  }
+
+  setPageSize(int v) {
+    _pageSize = v;
+    notifyListeners();
+  }
+
+  setCategory(String v) {
+    _category = v;
+  }
+
+  setFromDate(String v) {
+    _fromDate = v;
+    notifyListeners();
+  }
+
+  setToDate(String v) {
+    _toDate = v;
+    notifyListeners();
+  }
+
+  setOrderBy(String v) {
+    _orderBy = v;
+    notifyListeners();
+  }
+
+  setIsCategoriesLoading(bool v) {
+    _isCategoriesLoading = v;
+    notifyListeners();
+  }
+
+  setPaginController(PagingController<int, News> v) {
+    _pagingController = v;
+  }
 }
