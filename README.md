@@ -1,3 +1,6 @@
 # news_application
 
-A new Flutter project.
+- Riverpod state management
+- REST API
+- GET http method
+- pagination
